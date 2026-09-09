@@ -29,12 +29,13 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const isDemoPreview = request.nextUrl.searchParams.get("demo") === "1";
   const isProtected = request.nextUrl.pathname.startsWith("/dashboard");
   const isAuthPage =
     request.nextUrl.pathname.startsWith("/login") ||
     request.nextUrl.pathname.startsWith("/signup");
 
-  if (isProtected && !user) {
+  if (isProtected && !user && !isDemoPreview) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("next", request.nextUrl.pathname);
