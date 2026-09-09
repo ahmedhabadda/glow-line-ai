@@ -5,10 +5,12 @@ import { Logo } from "@/components/logo";
 export default function SignupPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
-      <Logo />
-      <Link href="/" className="text-sm text-stone-500 hover:text-stone-800 mb-4 inline-block">
-  ← Back to home
-</Link>
+      <div className="flex items-center gap-4">
+  <Link href="/" className="text-sm text-stone-500 hover:text-stone-800 whitespace-nowrap">
+    ← Back
+  </Link>
+  <Logo />
+</div>
       <h1 className="mt-10 font-display text-4xl">Open your clinic workspace</h1>
       <p className="mt-2 text-sm text-ink/60">
         For managers of boutique aesthetics and wellness rooms in London.
