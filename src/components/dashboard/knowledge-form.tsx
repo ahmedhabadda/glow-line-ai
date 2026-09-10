@@ -7,14 +7,23 @@ import { readDemoValue, writeDemoValue } from "@/lib/demo-store";
 import { createId } from "@/lib/format";
 import type { ClinicKnowledge, FaqItem, ServiceItem } from "@/lib/types";
 
-export function KnowledgeForm({ initial }: { initial: ClinicKnowledge }) {
+export function KnowledgeForm({
+  initial,
+  isRealData = false,
+}: {
+  initial: ClinicKnowledge;
+  /** True when `initial` came from the user's real saved Supabase data.
+   * When true we skip the localStorage demo overlay entirely, so a stale
+   * demo-mode edit in this browser can never shadow real saved data. */
+  isRealData?: boolean;
+}) {
   const [knowledge, setKnowledge] = useState(initial);
   const [status, setStatus] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    setKnowledge(readDemoValue("knowledge", initial));
-  }, [initial]);
+    setKnowledge(isRealData ? initial : readDemoValue("knowledge", initial));
+  }, [initial, isRealData]);
 
   function update<K extends keyof ClinicKnowledge>(key: K, value: ClinicKnowledge[K]) {
     setKnowledge((current) => ({ ...current, [key]: value }));
@@ -42,7 +51,7 @@ export function KnowledgeForm({ initial }: { initial: ClinicKnowledge }) {
       onSubmit={async (event) => {
         event.preventDefault();
         setPending(true);
-        writeDemoValue("knowledge", knowledge);
+        if (!isRealData) writeDemoValue("knowledge", knowledge);
         const result = await saveKnowledge(knowledge);
         setStatus(result.message);
         setPending(false);
