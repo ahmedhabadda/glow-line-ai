@@ -41,6 +41,21 @@ export function AuthForm({ mode }: { mode: Mode }) {
         if (signUpError) throw signUpError;
 
         const userId = data.user?.id;
+
+        // Supabase intentionally returns a success-shaped response even when
+        // the email is already registered, to prevent account-enumeration
+        // attacks. One documented, safe signal it does expose: for an
+        // already-confirmed account, `identities` comes back empty. That's
+        // the one case we can surface a clearer message for without leaking
+        // anything about unconfirmed accounts.
+        if (data.user && data.user.identities?.length === 0) {
+          setInfo(
+            "It looks like you already have an account with this email. Try signing in, or reset your password if you've forgotten it.",
+          );
+          setPending(false);
+          return;
+        }
+
         if (userId) {
           await supabase.from("clinics").insert({
             owner_id: userId,
