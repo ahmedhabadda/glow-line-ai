@@ -45,7 +45,7 @@ export default function ResetPasswordPage() {
       <Logo />
       <h1 className="mt-10 font-display text-4xl">Choose a new password</h1>
       <p className="mt-2 text-sm text-ink/60">
-        You've followed a valid reset link. Set a new password to finish.
+      You&apos;ve followed a valid reset link. Set a new password to finish.. Set a new password to finish.
       </p>
       <form onSubmit={onSubmit} className="mt-8 space-y-4">
         <Field

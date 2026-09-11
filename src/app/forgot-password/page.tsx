@@ -50,7 +50,7 @@ export default function ForgotPasswordPage() {
       </div>
       <h1 className="mt-10 font-display text-4xl">Reset your password</h1>
       <p className="mt-2 text-sm text-ink/60">
-        Enter the email you signed up with and we'll send a reset link.
+      Enter the email you signed up with and we&apos;ll send a reset link.
       </p>
       <form onSubmit={onSubmit} className="mt-8 space-y-4">
         <Field
