@@ -14,13 +14,16 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [password, setPassword] = useState("");
   const [clinicName, setClinicName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [resending, setResending] = useState(false);
 
   const supabase = useMemo(() => createClient(), []);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     setError(null);
+    setInfo(null);
     setPending(true);
 
     if (!isSupabaseConfigured || !supabase) {
@@ -62,6 +65,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
             clinic_name: clinicName || "Untitled clinic",
           });
         }
+
+        if (!data.session) {
+          setInfo(
+            "Check your email to confirm your account, then sign in. If nothing arrives in a couple of minutes, check spam or try again shortly.",
+          );
+          setPending(false);
+          return;
+        }
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
@@ -77,6 +88,24 @@ export function AuthForm({ mode }: { mode: Mode }) {
     } finally {
       setPending(false);
     }
+  }
+
+  async function resendConfirmation() {
+    if (!supabase || !email) return;
+    setResending(true);
+    setError(null);
+    const { error: resendError } = await supabase.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    });
+    setInfo(
+      resendError
+        ? null
+        : "Confirmation email resent. Check your inbox (and spam folder) in a couple of minutes.",
+    );
+    if (resendError) setError(resendError.message);
+    setResending(false);
   }
 
   return (
@@ -109,6 +138,22 @@ export function AuthForm({ mode }: { mode: Mode }) {
         required={isSupabaseConfigured}
       />
       {error ? <p className="text-sm text-rose-700">{error}</p> : null}
+      {error && mode === "login" && error.toLowerCase().includes("confirm") ? (
+        <button
+          type="button"
+          onClick={() => void resendConfirmation()}
+          disabled={resending}
+          className="text-sm text-ink/60 underline"
+        >
+          {resending ? "Resending…" : "Resend confirmation email"}
+        </button>
+      ) : null}
+      {info ? <p className="text-sm text-emerald-700">{info}</p> : null}
+      {mode === "login" ? (
+        <a href="/forgot-password" className="block text-sm text-ink/60 underline">
+          Forgot your password?
+        </a>
+      ) : null}
       {!isSupabaseConfigured ? (
         <p className="text-xs text-ink/60">
           Supabase is not configured yet. Continue to open the clinic dashboard in demo mode.
