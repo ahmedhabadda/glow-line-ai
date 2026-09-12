@@ -9,6 +9,7 @@ export const env = {
   ...publicEnv,
   stripeSecretKey: read("STRIPE_SECRET_KEY"),
   stripeWebhookSecret: read("STRIPE_WEBHOOK_SECRET"),
+  supabaseServiceRoleKey: read("SUPABASE_SERVICE_ROLE_KEY"),
   openaiApiKey: read("OPENAI_API_KEY"),
   openaiModel: read("OPENAI_MODEL") ?? "gpt-4o-mini",
 };

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button, Card } from "@/components/ui";
 import { GLOWLINE_MONTHLY_PRICE_GBP } from "@/lib/billing";
 
-export function BillingCard() {
+export function BillingCard({ isActive = false }: { isActive?: boolean }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,8 +33,8 @@ export function BillingCard() {
         Recurring Stripe subscription for one clinic workspace: after-hours capture,
         knowledge-base concierge, lead inbox, and review routing.
       </p>
-      <Button onClick={() => void checkout()} disabled={pending}>
-        {pending ? "Redirecting…" : "Subscribe with Stripe"}
+      <Button onClick={() => void checkout()} disabled={pending || isActive}>
+        {isActive ? "Subscription active" : pending ? "Redirecting…" : "Subscribe with Stripe"}
       </Button>
       {error ? <p className="text-sm text-rose-700">{error}</p> : null}
     </Card>

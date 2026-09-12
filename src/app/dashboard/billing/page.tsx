@@ -1,4 +1,6 @@
 import { BillingCard } from "@/components/dashboard/billing-card";
+import { getOwnClinicId } from "@/lib/clinic-knowledge";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function BillingPage({
   searchParams,
@@ -6,6 +8,20 @@ export default async function BillingPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const { status } = await searchParams;
+  const clinicId = await getOwnClinicId();
+
+  let subscriptionStatus: string | null = null;
+  if (clinicId) {
+    const supabase = await createClient();
+    const { data } = (await supabase
+      ?.from("subscriptions")
+      .select("status")
+      .eq("clinic_id", clinicId)
+      .maybeSingle()) ?? { data: null };
+    subscriptionStatus = data?.status ?? null;
+  }
+
+  const isActive = subscriptionStatus === "active";
 
   return (
     <div className="space-y-6">
@@ -24,7 +40,15 @@ export default async function BillingPage({
       {status === "cancelled" ? (
         <p className="rounded-2xl bg-sand px-4 py-3 text-sm">Checkout cancelled. You can retry anytime.</p>
       ) : null}
-      <BillingCard />
+      {clinicId ? (
+        <p className="text-sm text-ink/70">
+          Current status:{" "}
+          <span className={isActive ? "font-medium text-sage" : "font-medium text-ink"}>
+            {subscriptionStatus ?? "inactive"}
+          </span>
+        </p>
+      ) : null}
+      <BillingCard isActive={isActive} />
     </div>
   );
 }
