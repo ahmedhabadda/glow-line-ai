@@ -11,7 +11,13 @@ const statusCopy: Record<LeadStatus, string> = {
   inquired: "Inquired",
 };
 
-export function LeadFeed({ initialLeads }: { initialLeads: Lead[] }) {
+export function LeadFeed({
+  initialLeads,
+  isRealData = false,
+}: {
+  initialLeads: Lead[];
+  isRealData?: boolean;
+}) {
   const [leads, setLeads] = useState(initialLeads);
   const [selectedId, setSelectedId] = useState(initialLeads[0]?.id);
   const selected = useMemo(
@@ -20,6 +26,8 @@ export function LeadFeed({ initialLeads }: { initialLeads: Lead[] }) {
   );
 
   useEffect(() => {
+    if (isRealData) return;
+
     const timer = window.setInterval(() => {
       setLeads((current) => {
         const stamp = new Date().toISOString();
@@ -106,7 +114,9 @@ export function LeadFeed({ initialLeads }: { initialLeads: Lead[] }) {
         ))}
       </div>
       <Card>
-        <p className="text-xs uppercase tracking-[0.16em] text-ink/50">Simulated chat log</p>
+      <p className="text-xs uppercase tracking-[0.16em] text-ink/50">
+          {isRealData ? "Live conversation" : "Simulated chat log"}
+        </p>
         <h2 className="mt-1 font-display text-3xl">{selected.patientName}</h2>
         <div className="mt-6 space-y-3">
           {selected.messages.map((message) => (
