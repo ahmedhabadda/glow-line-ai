@@ -67,9 +67,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         }
 
         if (!data.session) {
-          setInfo(
-            "Check your email to confirm your account, then sign in. If nothing arrives in a couple of minutes, check spam or try again shortly.",
-          );
+          setInfo("Check your email to confirm your account.");
           setPending(false);
           return;
         }
@@ -99,11 +97,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
       email,
       options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     });
-    setInfo(
-      resendError
-        ? null
-        : "Confirmation email resent. Check your inbox (and spam folder) in a couple of minutes.",
-    );
+    setInfo(resendError ? null : "Confirmation email resent.");
     if (resendError) setError(resendError.message);
     setResending(false);
   }
@@ -148,7 +142,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           {resending ? "Resending…" : "Resend confirmation email"}
         </button>
       ) : null}
-      {info ? <p className="text-sm text-emerald-700">{info}</p> : null}
+      {info ? <p className="text-sm text-ink">{info}</p> : null}
       {mode === "login" ? (
         <a href="/forgot-password" className="block text-sm text-ink/60 underline">
           Forgot your password?

@@ -33,9 +33,7 @@ export default function ForgotPasswordPage() {
     if (resetError) {
       setError(resetError.message);
     } else {
-      setStatus(
-        "If an account exists for that email, a reset link is on its way. Check your inbox (and spam folder) in a couple of minutes.",
-      );
+        setStatus("Reset link sent — check your inbox.");
     }
     setPending(false);
   }
@@ -63,7 +61,7 @@ export default function ForgotPasswordPage() {
           required
         />
         {error ? <p className="text-sm text-rose-700">{error}</p> : null}
-        {status ? <p className="text-sm text-emerald-700">{status}</p> : null}
+        {status ? <p className="text-sm text-ink">{status}</p> : null}
         <Button type="submit" className="w-full" disabled={pending}>
           {pending ? "Sending…" : "Send reset link"}
         </Button>
