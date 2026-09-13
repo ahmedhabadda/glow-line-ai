@@ -34,10 +34,9 @@ export function Field({
     <label className="block space-y-1.5">
       <span className="text-xs uppercase tracking-[0.16em] text-ink/60">{label}</span>
       <input
-              <input
-              className="w-full rounded-2xl border border-sand bg-white px-4 py-3 text-sm text-ink outline-none ring-champagne/30 placeholder:text-ink/35 focus:ring-2"
-              {...props}
-            />
+        className="w-full rounded-2xl border border-sand bg-white px-4 py-3 text-sm text-ink outline-none ring-champagne/30 placeholder:text-ink/35 focus:ring-2"
+        {...props}
+      />
     </label>
   );
 }
@@ -50,10 +49,9 @@ export function TextArea({
     <label className="block space-y-1.5">
       <span className="text-xs uppercase tracking-[0.16em] text-ink/60">{label}</span>
       <textarea
-              <textarea
-              className="min-h-28 w-full rounded-2xl border border-sand bg-white px-4 py-3 text-sm text-ink outline-none ring-champagne/30 placeholder:text-ink/35 focus:ring-2"
-              {...props}
-            />
+        className="min-h-28 w-full rounded-2xl border border-sand bg-white px-4 py-3 text-sm text-ink outline-none ring-champagne/30 placeholder:text-ink/35 focus:ring-2"
+        {...props}
+      />
     </label>
   );
 }
