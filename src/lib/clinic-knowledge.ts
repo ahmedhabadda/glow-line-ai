@@ -2,12 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { mockKnowledge } from "@/lib/mock-data";
 import type { ClinicKnowledge } from "@/lib/types";
 
-/**
- * Loads a clinic's real knowledge (name, hours, services, FAQs) from Supabase
- * for use in the AI receptionist prompt. Falls back to mockKnowledge if the
- * clinic can't be found, Supabase isn't configured, or the clinic has no
- * services/FAQs saved yet — so the widget always has something sensible to say.
- */
 export async function getClinicKnowledgeById(
   clinicId: string | null | undefined,
 ): Promise<{ knowledge: ClinicKnowledge; isRealData: boolean }> {
@@ -20,23 +14,22 @@ export async function getClinicKnowledgeById(
     return { knowledge: mockKnowledge, isRealData: false };
   }
 
-  const { data: clinic } = await supabase
-    .from("clinics")
-    .select("id, clinic_name, address, phone, whatsapp, operating_hours, tone")
-    .eq("id", clinicId)
-    .maybeSingle();
-
-  if (!clinic) {
-    return { knowledge: mockKnowledge, isRealData: false };
-  }
-
-  const [{ data: services }, { data: faqs }] = await Promise.all([
+  const [{ data: clinic }, { data: services }, { data: faqs }] = await Promise.all([
+    supabase
+      .from("clinics")
+      .select("id, clinic_name, address, phone, whatsapp, operating_hours, tone")
+      .eq("id", clinicId)
+      .maybeSingle(),
     supabase
       .from("services")
       .select("id, name, duration_minutes, price_gbp")
       .eq("clinic_id", clinicId),
     supabase.from("faqs").select("id, question, answer").eq("clinic_id", clinicId),
   ]);
+
+  if (!clinic) {
+    return { knowledge: mockKnowledge, isRealData: false };
+  }
 
   const hasContent = Boolean(services?.length || faqs?.length);
 

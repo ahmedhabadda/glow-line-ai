@@ -42,7 +42,8 @@ function knowledgeSystemPrompt(knowledge: ClinicKnowledge): string {
 
 function placeholderReply(messages: ChatTurn[], knowledge: ClinicKnowledge): string {
   const latest = messages.at(-1)?.content.toLowerCase() ?? "";
-  const serviceHit = knowledge.services.find((service) =>
+  const namedServices = knowledge.services.filter((service) => service.name.trim().length > 0);
+  const serviceHit = namedServices.find((service) =>
     latest.includes(service.name.split(" ")[0]?.toLowerCase() ?? ""),
   );
 
@@ -86,8 +87,10 @@ function placeholderReply(messages: ChatTurn[], knowledge: ClinicKnowledge): str
     return `${serviceHit.name} is £${serviceHit.priceGbp} for ${serviceHit.durationMinutes} minutes. ${knowledge.operatingHours} Would you like me to qualify a booking?`;
   }
 
-  const faqHit = knowledge.faqs.find((faq) =>
-    latest.includes(faq.question.toLowerCase().split(" ")[0] ?? ""),
+  const faqHit = knowledge.faqs.find(
+    (faq) =>
+      faq.question.trim().length > 0 &&
+      latest.includes(faq.question.toLowerCase().split(" ")[0] ?? ""),
   );
 
   if (faqHit) return faqHit.answer;
@@ -103,8 +106,6 @@ export async function generateClinicReply(
     return { reply: placeholderReply(messages, knowledge), provider: "placeholder" };
   }
 
-  // Placeholder for the live OpenAI integration.
-  // Replace this fetch with your preferred SDK once OPENAI_API_KEY is set.
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -122,6 +123,8 @@ export async function generateClinicReply(
   });
 
   if (!response.ok) {
+    const errorBody = await response.text().catch(() => "");
+    console.error("OpenAI request failed", response.status, errorBody);
     return { reply: placeholderReply(messages, knowledge), provider: "placeholder" };
   }
 
