@@ -77,11 +77,12 @@ async function replaceChildren(
   await supabase.from("services").delete().eq("clinic_id", clinicId);
   await supabase.from("faqs").delete().eq("clinic_id", clinicId);
 
-  if (knowledge.services.length) {
+  const namedServices = knowledge.services.filter((service) => service.name.trim().length > 0);
+  if (namedServices.length) {
     const { error } = await supabase.from("services").insert(
-      knowledge.services.map((service) => ({
+      namedServices.map((service) => ({
         clinic_id: clinicId,
-        name: service.name,
+        name: service.name.trim(),
         duration_minutes: service.durationMinutes,
         price_gbp: service.priceGbp,
       })),
@@ -89,12 +90,15 @@ async function replaceChildren(
     if (error) return { ok: false, message: `Could not save services: ${error.message}` };
   }
 
-  if (knowledge.faqs.length) {
+  const answeredFaqs = knowledge.faqs.filter(
+    (faq) => faq.question.trim().length > 0 && faq.answer.trim().length > 0,
+  );
+  if (answeredFaqs.length) {
     const { error } = await supabase.from("faqs").insert(
-      knowledge.faqs.map((faq) => ({
+      answeredFaqs.map((faq) => ({
         clinic_id: clinicId,
-        question: faq.question,
-        answer: faq.answer,
+        question: faq.question.trim(),
+        answer: faq.answer.trim(),
       })),
     );
     if (error) return { ok: false, message: `Could not save FAQs: ${error.message}` };
