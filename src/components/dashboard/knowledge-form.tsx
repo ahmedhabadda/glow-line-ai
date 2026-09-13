@@ -104,8 +104,8 @@ export function KnowledgeForm({
                 ...knowledge.services,
                 {
                   id: createId("svc"),
-                  name: "New treatment",
-                  durationMinutes: 30,
+                  name: "",
+                  durationMinutes: 0,
                   priceGbp: 0,
                 },
               ])
@@ -119,22 +119,29 @@ export function KnowledgeForm({
             <Field
               label="Service"
               value={service.name}
+              placeholder="e.g. Signature brightening peel"
               onChange={(event) => updateService(service.id, { name: event.target.value })}
             />
             <Field
               label="Duration (minutes)"
               type="number"
-              value={service.durationMinutes}
+              placeholder="e.g. 30"
+              value={service.durationMinutes === 0 ? "" : service.durationMinutes}
               onChange={(event) =>
-                updateService(service.id, { durationMinutes: Number(event.target.value) })
+                updateService(service.id, {
+                  durationMinutes: event.target.value === "" ? 0 : Number(event.target.value),
+                })
               }
             />
             <Field
               label="Price (£)"
               type="number"
-              value={service.priceGbp}
+              placeholder="e.g. 250"
+              value={service.priceGbp === 0 ? "" : service.priceGbp}
               onChange={(event) =>
-                updateService(service.id, { priceGbp: Number(event.target.value) })
+                updateService(service.id, {
+                  priceGbp: event.target.value === "" ? 0 : Number(event.target.value),
+                })
               }
             />
           </div>
@@ -162,11 +169,13 @@ export function KnowledgeForm({
             <Field
               label="Question"
               value={faq.question}
+              placeholder="e.g. Do you offer patch tests?"
               onChange={(event) => updateFaq(faq.id, { question: event.target.value })}
             />
             <TextArea
               label="Answer the AI should use"
               value={faq.answer}
+              placeholder="e.g. Yes, we require a patch test 48 hours before treatment."
               onChange={(event) => updateFaq(faq.id, { answer: event.target.value })}
             />
           </div>

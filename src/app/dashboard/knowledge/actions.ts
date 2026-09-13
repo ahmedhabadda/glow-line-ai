@@ -63,12 +63,10 @@ export async function saveKnowledge(knowledge: ClinicKnowledge) {
       })
       .eq("id", clinicId);
 
-    await replaceChildren(supabase, clinicId, knowledge);
-    return { ok: true, message: "Knowledge base updated." };
+    return await replaceChildren(supabase, clinicId, knowledge);
   }
 
-  await replaceChildren(supabase, clinic.id, knowledge);
-  return { ok: true, message: "Knowledge base updated." };
+  return await replaceChildren(supabase, clinic.id, knowledge);
 }
 
 async function replaceChildren(
@@ -80,7 +78,7 @@ async function replaceChildren(
   await supabase.from("faqs").delete().eq("clinic_id", clinicId);
 
   if (knowledge.services.length) {
-    await supabase.from("services").insert(
+    const { error } = await supabase.from("services").insert(
       knowledge.services.map((service) => ({
         clinic_id: clinicId,
         name: service.name,
@@ -88,15 +86,19 @@ async function replaceChildren(
         price_gbp: service.priceGbp,
       })),
     );
+    if (error) return { ok: false, message: `Could not save services: ${error.message}` };
   }
 
   if (knowledge.faqs.length) {
-    await supabase.from("faqs").insert(
+    const { error } = await supabase.from("faqs").insert(
       knowledge.faqs.map((faq) => ({
         clinic_id: clinicId,
         question: faq.question,
         answer: faq.answer,
       })),
     );
+    if (error) return { ok: false, message: `Could not save FAQs: ${error.message}` };
   }
+
+  return { ok: true, message: "Knowledge base updated." };
 }
