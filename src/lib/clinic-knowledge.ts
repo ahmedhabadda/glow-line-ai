@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import { mockKnowledge } from "@/lib/mock-data";
-import type { ClinicKnowledge } from "@/lib/types";
+import { mockKnowledge, mockReviewSettings } from "@/lib/mock-data";
+import type { ClinicKnowledge, ReviewSettings } from "@/lib/types";
 
 export async function getClinicKnowledgeById(
   clinicId: string | null | undefined,
@@ -59,6 +59,41 @@ export async function getClinicKnowledgeById(
 
   return { knowledge, isRealData: hasContent };
 }
+
+/** Returns a clinic's real saved review settings, if any. */
+export async function getReviewSettings(
+    clinicId: string | null | undefined,
+  ): Promise<{ settings: ReviewSettings; isRealData: boolean }> {
+    if (!clinicId) {
+      return { settings: mockReviewSettings, isRealData: false };
+    }
+  
+    const supabase = await createClient();
+    if (!supabase) {
+      return { settings: mockReviewSettings, isRealData: false };
+    }
+  
+    const { data } = await supabase
+      .from("review_settings")
+      .select("enabled, send_delay_hours, sms_template, google_review_url, escalate_if_score_below")
+      .eq("clinic_id", clinicId)
+      .maybeSingle();
+  
+    if (!data) {
+      return { settings: mockReviewSettings, isRealData: false };
+    }
+  
+    return {
+      settings: {
+        enabled: data.enabled,
+        sendDelayHours: data.send_delay_hours,
+        smsTemplate: data.sms_template,
+        googleReviewUrl: data.google_review_url,
+        escalateIfScoreBelow: data.escalate_if_score_below,
+      },
+      isRealData: true,
+    };
+  }
 
 /** Returns the clinic_id owned by the currently signed-in user, if any. */
 export async function getOwnClinicId(): Promise<string | null> {

@@ -82,7 +82,7 @@ export function LeadFeed({
     }, 14000);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [isRealData]);
 
   if (!selected) {
     return <p className="text-sm text-ink/60">No leads yet. The concierge will land them here.</p>;

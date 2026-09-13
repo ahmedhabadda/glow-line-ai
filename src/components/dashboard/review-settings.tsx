@@ -6,14 +6,20 @@ import { Button, Card, Field, TextArea } from "@/components/ui";
 import { readDemoValue, writeDemoValue } from "@/lib/demo-store";
 import type { ReviewSettings } from "@/lib/types";
 
-export function ReviewSettingsForm({ initial }: { initial: ReviewSettings }) {
+export function ReviewSettingsForm({
+  initial,
+  isRealData = false,
+}: {
+  initial: ReviewSettings;
+  isRealData?: boolean;
+}) {
   const [settings, setSettings] = useState(initial);
   const [status, setStatus] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    setSettings(readDemoValue("reviews", initial));
-  }, [initial]);
+    setSettings(isRealData ? initial : readDemoValue("reviews", initial));
+  }, [initial, isRealData]);
 
   return (
     <form
