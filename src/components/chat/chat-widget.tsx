@@ -75,7 +75,7 @@ export function ChatWidget({
     return (
       <div className="flex h-full w-full flex-col overflow-hidden rounded-3xl border border-sand bg-white">
         <div className="bg-ink px-4 py-3 text-ivory">
-          <p className="font-display text-lg">Glowline concierge</p>
+          <p className="font-display text-lg">Glowline AI Receptionist</p>
           <p className="text-xs text-ivory/70">
             Live preview {provider ? `· ${provider}` : ""}
           </p>
@@ -118,7 +118,7 @@ export function ChatWidget({
       {open ? (
         <div className="mb-3 flex h-[28rem] w-[22rem] flex-col overflow-hidden rounded-3xl border border-sand bg-white shadow-glow">
           <div className="bg-ink px-4 py-3 text-ivory">
-            <p className="font-display text-lg">Glowline concierge</p>
+            <p className="font-display text-lg">Glowline AI Receptionist</p>
             <p className="text-xs text-ivory/70">
               24/7 web capture {provider ? `· ${provider}` : ""}
             </p>

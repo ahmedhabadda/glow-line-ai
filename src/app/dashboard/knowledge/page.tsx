@@ -36,7 +36,7 @@ export default async function KnowledgePage() {
           <ChatWidget
             embedded
             clinicId={clinicId ?? undefined}
-            greeting={`Hello, I'm the Glowline concierge for ${knowledge.clinicName}. Ask me about treatments, pricing, or booking.`}
+            greeting={`Hello, I'm the Glowline AI Receptionist for ${knowledge.clinicName}. Ask me about treatments, pricing, or booking.`}
           />
         </div>
       </div>
