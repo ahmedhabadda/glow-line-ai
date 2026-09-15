@@ -39,24 +39,35 @@ export async function POST(request: Request) {
     const subscriptionId =
       typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
 
-  if (clinicId) {
-    const { error } = await supabase.from("subscriptions").upsert({
-    clinic_id: clinicId,
-    stripe_customer_id: customerId ?? null,
-    stripe_subscription_id: subscriptionId ?? null,
-    status: "active",
+    console.log("checkout.session.completed received", {
+      clinicId,
+      customerId,
+      subscriptionId,
     });
-  if (error) console.error("Failed to upsert subscription on checkout completion", error);
+
+    if (clinicId) {
+      const { error } = await supabase.from("subscriptions").upsert({
+        clinic_id: clinicId,
+        stripe_customer_id: customerId ?? null,
+        stripe_subscription_id: subscriptionId ?? null,
+        status: "active",
+      });
+      if (error) {
+        console.error("Failed to upsert subscription on checkout completion", error);
+      } else {
+        console.log("Subscription upserted successfully for clinic", clinicId);
+      }
     } else {
       console.error("checkout.session.completed had no client_reference_id — cannot link to a clinic");
     }
+  }
 
   if (event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted") {
     const subscription = event.data.object as Stripe.Subscription;
     const customerId =
       typeof subscription.customer === "string" ? subscription.customer : subscription.customer.id;
 
-      const { error } = await supabase
+    const { error } = await supabase
       .from("subscriptions")
       .update({
         status: event.type === "customer.subscription.deleted" ? "cancelled" : subscription.status,
