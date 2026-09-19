@@ -36,29 +36,27 @@ export function BillingHistory({ invoices }: { invoices: InvoiceHistoryItem[] })
             </tr>
           </thead>
           <tbody className="divide-y divide-sand">
-            {invoices.map((invoice) => (
-              <tr key={invoice.id}>
-                <td className="py-3 pr-4 whitespace-nowrap">{formatDateTime(invoice.createdAt)}</td>
-                <td className="py-3 pr-4 whitespace-nowrap">{formatGbp(invoice.amountGbp)}</td>
-                <td className="py-3 pr-4 whitespace-nowrap">
-                  {STATUS_LABEL[invoice.status] ?? invoice.status}
-                </td>
-                <td className="py-3">
-                  {invoice.hostedInvoiceUrl ? (
-                    
-                      href={invoice.hostedInvoiceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline"
-                    >
-                      View
-                    </a>
-                  ) : (
-                    <span className="text-ink/40">—</span>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {invoices.map((invoice) => {
+              const receiptLink = invoice.hostedInvoiceUrl;
+              return (
+                <tr key={invoice.id}>
+                  <td className="py-3 pr-4 whitespace-nowrap">{formatDateTime(invoice.createdAt)}</td>
+                  <td className="py-3 pr-4 whitespace-nowrap">{formatGbp(invoice.amountGbp)}</td>
+                  <td className="py-3 pr-4 whitespace-nowrap">
+                    {STATUS_LABEL[invoice.status] ?? invoice.status}
+                  </td>
+                  <td className="py-3">
+                    {receiptLink ? (
+                      <a href={receiptLink} target="_blank" rel="noopener noreferrer" className="underline">
+                        View
+                      </a>
+                    ) : (
+                      <span className="text-ink/40">—</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
