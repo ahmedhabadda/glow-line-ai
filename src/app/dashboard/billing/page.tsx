@@ -1,5 +1,7 @@
 import { BillingCard } from "@/components/dashboard/billing-card";
+import { BillingHistory } from "@/components/dashboard/billing-history";
 import { getOwnClinicId } from "@/lib/clinic-knowledge";
+import { getInvoiceHistory } from "@/lib/billing-history";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function BillingPage({
@@ -11,17 +13,21 @@ export default async function BillingPage({
   const clinicId = await getOwnClinicId();
 
   let subscriptionStatus: string | null = null;
+  let stripeCustomerId: string | null = null;
+
   if (clinicId) {
     const supabase = await createClient();
     const { data } = (await supabase
       ?.from("subscriptions")
-      .select("status")
+      .select("status, stripe_customer_id")
       .eq("clinic_id", clinicId)
       .maybeSingle()) ?? { data: null };
     subscriptionStatus = data?.status ?? null;
+    stripeCustomerId = data?.stripe_customer_id ?? null;
   }
 
   const isActive = subscriptionStatus === "active";
+  const invoices = await getInvoiceHistory(stripeCustomerId);
 
   return (
     <div className="space-y-6">
@@ -49,6 +55,7 @@ export default async function BillingPage({
         </p>
       ) : null}
       <BillingCard isActive={isActive} />
+      <BillingHistory invoices={invoices} />
     </div>
   );
 }
