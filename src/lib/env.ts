@@ -23,3 +23,5 @@ export const isStripeConfigured = Boolean(
 );
 
 export const isOpenAIConfigured = Boolean(env.openaiApiKey);
+
+export const isNotifyConfigured = Boolean(env.resendApiKey);
