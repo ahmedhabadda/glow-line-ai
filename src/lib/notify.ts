@@ -15,24 +15,38 @@ export async function notifyHotLead(params: {
   summary: string;
   estimatedValueGbp: number;
 }) {
-  if (!isNotifyConfigured) return;
+  if (!isNotifyConfigured) {
+    console.error("notifyHotLead skipped: RESEND_API_KEY is not configured");
+    return;
+  }
 
   const supabase = createAdminClient();
-  if (!supabase) return;
+  if (!supabase) {
+    console.error("notifyHotLead skipped: admin Supabase client unavailable");
+    return;
+  }
 
   try {
-    const { data: clinic } = await supabase
+    const { data: clinic, error: clinicError } = await supabase
       .from("clinics")
       .select("owner_id")
       .eq("id", params.clinicId)
       .maybeSingle();
-    if (!clinic) return;
+    if (clinicError || !clinic) {
+      console.error("notifyHotLead: could not find clinic", params.clinicId, clinicError);
+      return;
+    }
 
-    const { data: userResult } = await supabase.auth.admin.getUserById(clinic.owner_id);
+    const { data: userResult, error: userError } = await supabase.auth.admin.getUserById(
+      clinic.owner_id,
+    );
     const ownerEmail = userResult?.user?.email;
-    if (!ownerEmail) return;
+    if (userError || !ownerEmail) {
+      console.error("notifyHotLead: could not find owner email", clinic.owner_id, userError);
+      return;
+    }
 
-    await fetch("https://api.resend.com/emails", {
+    const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${env.resendApiKey}`,
@@ -53,7 +67,14 @@ export async function notifyHotLead(params: {
         ].join("\n"),
       }),
     });
-  } catch {
-    // Notification failure should never affect the patient's conversation.
+
+    if (!response.ok) {
+      const errorBody = await response.text().catch(() => "");
+      console.error("notifyHotLead: Resend API call failed", response.status, errorBody);
+    } else {
+      console.log("notifyHotLead: email sent successfully to", ownerEmail);
+    }
+  } catch (err) {
+    console.error("notifyHotLead: unexpected error", err);
   }
 }
