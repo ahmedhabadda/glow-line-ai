@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { generateClinicReply } from "@/lib/openai";
 import { getClinicKnowledgeById } from "@/lib/clinic-knowledge";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { notifyHotLead } from "@/lib/notify";
 import type { ChatTurn, ServiceItem } from "@/lib/types";
 
 const BOOKING_KEYWORDS = [
@@ -97,6 +98,7 @@ export async function POST(request: Request) {
       const mentionedService = detectMentionedService(latestPatientMessage.content, knowledge.services);
       const fullText = messages.map((message) => message.content).join(" ").toLowerCase();
       const looksHot = BOOKING_KEYWORDS.some((keyword) => fullText.includes(keyword));
+      const estimatedValueGbp = mentionedService?.priceGbp ?? 0;
 
       if (!leadId) {
         const generatedId = randomUUID();
@@ -107,19 +109,47 @@ export async function POST(request: Request) {
           channel: "web",
           status: looksHot ? "hot" : "inquired",
           summary: summarize(messages),
-          estimated_value_gbp: mentionedService?.priceGbp ?? 0,
+          estimated_value_gbp: estimatedValueGbp,
         });
-        if (!insertError) leadId = generatedId;
+        if (!insertError) {
+          leadId = generatedId;
+          if (looksHot) {
+            await notifyHotLead({
+              clinicId,
+              clinicName: knowledge.clinicName,
+              patientName,
+              summary: summarize(messages),
+              estimatedValueGbp,
+            });
+          }
+        }
       } else {
+        const { data: existingLead } = await supabase
+          .from("leads")
+          .select("status")
+          .eq("id", leadId)
+          .maybeSingle();
+        const wasAlreadyHot = existingLead?.status === "hot";
+
         await supabase
           .from("leads")
           .update({
             status: looksHot ? "hot" : "inquired",
             summary: summarize(messages),
-            estimated_value_gbp: mentionedService?.priceGbp ?? 0,
+            estimated_value_gbp: estimatedValueGbp,
             updated_at: new Date().toISOString(),
           })
           .eq("id", leadId);
+
+        if (looksHot && !wasAlreadyHot) {
+          await notifyHotLead({
+            clinicId,
+            clinicName: knowledge.clinicName,
+            patientName,
+            summary: summarize(messages),
+            estimatedValueGbp,
+          });
+        }
       }
 
       if (leadId) {

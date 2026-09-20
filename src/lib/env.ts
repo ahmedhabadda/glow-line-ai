@@ -12,6 +12,8 @@ export const env = {
   supabaseServiceRoleKey: read("SUPABASE_SERVICE_ROLE_KEY"),
   openaiApiKey: read("OPENAI_API_KEY"),
   openaiModel: read("OPENAI_MODEL") ?? "gpt-4o-mini",
+  resendApiKey: read("RESEND_API_KEY"),
+  notifyFromEmail: read("NOTIFY_FROM_EMAIL") ?? "onboarding@resend.dev",
 };
 
 export { isSupabaseConfigured } from "@/lib/public-env";
