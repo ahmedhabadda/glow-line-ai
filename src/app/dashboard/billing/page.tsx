@@ -27,6 +27,7 @@ export default async function BillingPage({
   }
 
   const isActive = subscriptionStatus === "active";
+  const hasStripeCustomer = Boolean(stripeCustomerId);
   const invoices = await getInvoiceHistory(stripeCustomerId);
 
   return (
@@ -54,7 +55,7 @@ export default async function BillingPage({
           </span>
         </p>
       ) : null}
-      <BillingCard isActive={isActive} />
+      <BillingCard isActive={isActive} hasStripeCustomer={hasStripeCustomer} />
       <BillingHistory invoices={invoices} />
     </div>
   );
